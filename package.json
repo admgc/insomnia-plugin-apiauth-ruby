@@ -1,0 +1,31 @@
+{
+  "name": "insomnia-plugin-apiauth-ruby",
+  "version": "1.0.0",
+  "description": "Generate Authorization Headers for use with the 'ApiAuth' Ruby Library",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/admgc/insomnia-plugin-apiauth-ruby.git"
+  },
+  "keywords": [
+    "insomnia",
+    "apiauth",
+    "ruby",
+    "hmac"
+  ],
+  "author": "Adam Carlyle",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/admgc/insomnia-plugin-apiauth-ruby/issues"
+  },
+  "homepage": "https://github.com/admgc/insomnia-plugin-apiauth-ruby#readme",
+  "insomnia": {
+    "name": "apiauthRuby",
+    "description": "Generate Authorization Headers for use with the 'ApiAuth' Ruby Library"
+  },
+  "main": "plugin.js",
+  "scripts": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
