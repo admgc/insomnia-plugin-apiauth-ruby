@@ -41,6 +41,7 @@ module.exports.requestHooks = [async (context) => {
   const keyId = await context.store.getItem("keyId");
   const keySecret = await context.store.getItem("keySecret");
   const payload = context.request.getBody().text || ''
+  const method = context.request.getMethod()
 
   // Build up request header data
   const now = new Date().toUTCString();
@@ -48,13 +49,13 @@ module.exports.requestHooks = [async (context) => {
     'Content-Type': 'application/json',
     'Accept': 'text/plain',
     'Date': now,
-    'Content-MD5': crypto.createHash('md5')
+    'Content-MD5': crypto.createHash('sha256')
       .update(Buffer.from(payload, 'utf-8'))
       .digest('hex')
   };
 
   // Sign request per APIAuth specs
-  const canon = canonicalString(headers, context.request.getUrl());
+  const canon = canonicalString(method, headers, context.request.getUrl() + addParamsToURL(context.request.getParameters()));
   const signature = requestSignature(canon, keySecret);
   const auth = authorizationHeader(keyId, signature);
 
@@ -68,18 +69,20 @@ module.exports.requestHooks = [async (context) => {
 
 // Utility functions
 
-function canonicalString(headers, url) {
+function canonicalString(method, headers, url) {
   console.log("ApiAuth: building canonical string");
   const uriWithoutHostRegexp = new RegExp('https?://[^,?/]*');
   let uriWithoutHost = ''
   if (url.match(uriWithoutHostRegexp)) uriWithoutHost = url.replace(uriWithoutHostRegexp, '');
   if (!uriWithoutHost) uriWithoutHost = '/';
   const components = [
+    method,
     headers['Content-Type'],
     headers['Content-MD5'],
     uriWithoutHost,
     headers['Date']
   ];
+  console.log(components)
   return components.join(',')
 }
 
@@ -95,4 +98,26 @@ function requestSignature(canon, keySecret) {
 function authorizationHeader(keyId, signature) {
   console.log("ApiAuth: building authorization header");
   return `APIAuth ${keyId}:${Buffer.from(signature).toString('utf-8')}`
+}
+
+function addParamsToURL(params) {
+  console.log("Encoding Params for URL");
+  let paramsString = ''
+  if (params.length > 0)
+  {
+    count = 0
+    paramsString += '?'
+    for (const param of params) {
+      if (count != 0)
+      {
+        paramsString += '&'
+      }
+      paramsString += encodeURI(param['name'])
+      paramsString += '='
+      paramsString += encodeURI(param['value'])
+      count++
+    }
+  }
+  console.log(paramsString)
+  return paramsString
 }
